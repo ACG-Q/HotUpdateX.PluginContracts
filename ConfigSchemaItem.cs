@@ -1,5 +1,8 @@
 namespace HotUpdateX.PluginContracts;
 
+/// <summary>
+/// 插件配置项描述（Plugin config schema item）
+/// </summary>
 public class ConfigSchemaItem
 {
     /// <summary>
@@ -13,7 +16,7 @@ public class ConfigSchemaItem
     /// <summary>
     /// 类型（string/int/bool/enum等）/ Type (string/int/bool/enum, etc.)
     /// </summary>
-    public string Type { get; set; } = "string";
+    public string Type { get; set; } = string.Empty;
     /// <summary>
     /// 描述 / Description
     /// </summary>
@@ -29,7 +32,7 @@ public class ConfigSchemaItem
     /// <summary>
     /// 是否必填 / Is required
     /// </summary>
-    public bool Required { get; set; } = false;
+    public bool Required { get; set; }
     /// <summary>
     /// 分组名 / Group name
     /// </summary>
@@ -37,9 +40,9 @@ public class ConfigSchemaItem
     /// <summary>
     /// 排序权重 / Order
     /// </summary>
-    public int Order { get; set; } = 0;
+    public int Order { get; set; }
     /// <summary>
     /// 是否为高级项 / Is advanced
     /// </summary>
-    public bool Advanced { get; set; } = false;
+    public bool Advanced { get; set; }
 } 

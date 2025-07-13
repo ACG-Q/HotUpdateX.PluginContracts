@@ -1,9 +1,12 @@
 namespace HotUpdateX.PluginContracts;
 
+/// <summary>
+/// 插件元数据（Plugin metadata info）
+/// </summary>
 public class PluginInfo
 {
     /// <summary>
-    /// 插件唯一ID（如 github、gitee）/ Unique plugin ID (e.g., github, gitee)
+    /// 插件唯一ID / Unique plugin ID
     /// </summary>
     public string Id { get; set; } = string.Empty;
     /// <summary>

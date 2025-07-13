@@ -1,112 +1,163 @@
-# HotUpdateX.PluginContracts
+# HotUpdateX.PluginContracts 契约说明
 
-本包为 HotUpdateX 主程序与插件之间的契约数据结构，推荐插件开发者和主程序都引用本包，进行 JSON 序列化/反序列化。
-
-## 约定数据结构
-
-- PluginInfo：插件元数据（支持 Type、Website、Features、UpdateTime 等）
-- SoftwareInfo：软件信息（支持 IconUrl、CurrentVersion、LatestVersion、DownloadUrl、Author、Description 等）
-- ConfigSchemaItem：插件配置项描述（支持 Required、Group、Order、Advanced 等）
+本包定义 HotUpdateX 主程序与插件之间的标准数据结构和方法协议，确保插件生态的可扩展性和一致性。
 
 ---
 
-## 字段详细说明
+## 1. 插件信息格式（PluginInfo）
 
-### PluginInfo
-| 字段名         | 类型         | 说明（中/英）                                                                 | 示例值                  |
-|----------------|--------------|-------------------------------------------------------------------------------|-------------------------|
-| Id             | string       | 插件唯一ID（如 github、gitee）/ Unique plugin ID (e.g., github, gitee)        | "github"               |
-| Name           | string       | 插件名称 / Plugin name                                                        | "GitHub 源"           |
-| Author         | string       | 插件作者 / Plugin author                                                      | "acg-q"               |
-| Description    | string       | 插件描述 / Plugin description                                                 | "支持 GitHub 软件源"   |
-| Version        | string       | 插件版本 / Plugin version                                                     | "1.0.0"               |
-| Type           | string?      | 插件类型（如 source/config/other）/ Plugin type (e.g., source/config/other)   | "source"              |
-| Website        | string?      | 插件官网 / Plugin website                                                     | "https://example.com"  |
-| Features       | string[]?    | 支持的功能列表 / Supported features                                           | ["check-update"]       |
-| UpdateTime     | string?      | 插件最后更新时间（ISO8601）/ Last update time (ISO8601)                      | "2024-05-01T12:00:00Z" |
-
-### SoftwareInfo
-| 字段名         | 类型         | 说明（中/英）                                                                 | 示例值                  |
-|----------------|--------------|-------------------------------------------------------------------------------|-------------------------|
-| Name           | string       | 软件名称 / Software name                                                      | "Notepad++"            |
-| SourceName     | string       | 源名称（如 GitHub、Gitee）/ Source name (e.g., GitHub, Gitee)                 | "GitHub"               |
-| RepoAddress    | string       | 仓库地址或唯一标识 / Repo address or unique identifier                        | "acg-q/HotUpdateX"     |
-| VersionRegex   | string       | 版本号正则表达式 / Version regex                                              | "v?(\\d+\\.\\d+\\.\\d+)" |
-| UpdateUrlRegex | string       | 更新地址正则表达式 / Update URL regex                                         | "/releases"            |
-| IconUrl        | string?      | 软件图标地址 / Icon URL                                                       | "https://.../icon.png" |
-| CurrentVersion | string?      | 当前版本 / Current version                                                    | "1.0.0"                |
-| LatestVersion  | string?      | 最新版本 / Latest version                                                     | "1.2.0"                |
-| DownloadUrl    | string?      | 下载地址 / Download URL                                                       | "https://.../dl.zip"   |
-| Author         | string?      | 作者 / Author                                                                 | "acg-q"                |
-| Description    | string?      | 描述 / Description                                                            | "文本编辑器"           |
-
-### ConfigSchemaItem
-| 字段名      | 类型              | 说明（中/英）                                                        | 示例值           |
-|-------------|-------------------|-----------------------------------------------------------------------|------------------|
-| Key         | string            | 配置项唯一 key / Unique key for the config item                       | "apiToken"      |
-| Label       | string            | UI 显示名 / UI display name                                           | "API 密钥"      |
-| Type        | string            | 类型（string/int/bool/enum等）/ Type (string/int/bool/enum, etc.)     | "string"        |
-| Description | string?           | 描述 / Description                                                    | "用于认证"      |
-| DefaultValue| string?           | 默认值 / Default value                                                | "mock-token"    |
-| EnumValues  | IEnumerable<string>? | 枚举可选值 / Enum selectable values                                 | ["A", "B"]     |
-| Required    | bool              | 是否必填 / Is required                                                | true             |
-| Group       | string?           | 分组名 / Group name                                                   | "高级"          |
-| Order       | int               | 排序权重 / Order                                                      | 0                |
-| Advanced    | bool              | 是否为高级项 / Is advanced                                            | false            |
+| 字段名      | 类型     | 说明（中/英）                                      | 示例值                  |
+|-------------|----------|---------------------------------------------------|-------------------------|
+| Id          | string   | 插件唯一ID / Unique plugin ID                     | "github"               |
+| Name        | string   | 插件名称 / Plugin name                            | "GitHub 源"           |
+| Author      | string   | 插件作者 / Plugin author                          | "acg-q"               |
+| Description | string   | 插件描述 / Plugin description                     | "支持 GitHub 软件源"   |
+| Version     | string   | 插件版本 / Plugin version                         | "1.0.0"               |
+| Type        | string?  | 插件类型（如 source/config/other）/ Plugin type   | "source"              |
+| Website     | string?  | 插件官网 / Plugin website                         | "https://example.com"  |
+| Features    | string[]?| 支持的功能列表 / Supported features               | ["check-update"]       |
+| UpdateTime  | string?  | 插件最后更新时间（ISO8601）/ Last update time    | "2024-05-01T12:00:00Z" |
 
 ---
 
-## 推荐插件实现方式
+## 2. 契约方法统一参数协议
 
-```csharp
-using HotUpdateX.PluginContracts;
-using System.Text.Json;
-
-public class PluginEntry
-{
-    public string GetPluginInfo()
-    {
-        var info = new PluginInfo
-        {
-            Id = "template",
-            Name = "模板源",
-            Author = "xxx",
-            Description = "描述",
-            Version = "1.0.0",
-            Type = "source",
-            Website = "https://example.com",
-            Features = new[] { "check-update", "download" },
-            UpdateTime = DateTime.UtcNow.ToString("o")
-        };
-        return JsonSerializer.Serialize(info);
-    }
-    // 其它方法同理
-}
-```
-
-## 主程序用法
-
-```csharp
-using HotUpdateX.PluginContracts;
-using System.Text.Json;
-
-// 反射调用后
-var json = getInfo.Invoke(instance, null) as string;
-var info = JsonSerializer.Deserialize<PluginInfo>(json);
-```
-
-## JSON 格式示例
-
+### 2.1 Info()
+- **用途**：获取插件元数据。
+- **输入**：无
+- **输出**：PluginInfo 的 JSON 字符串
+- **输出示例**：
 ```json
 {
-  "id": "template",
-  "name": "模板源",
-  "author": "xxx",
-  "description": "描述",
-  "version": "1.0.0",
-  "type": "source",
-  "website": "https://example.com",
-  "features": ["check-update", "download"],
-  "updateTime": "2024-05-01T12:00:00Z"
+  "Id": "github",
+  "Name": "GitHub 源",
+  "Author": "acg-q",
+  "Description": "支持 GitHub 软件源",
+  "Version": "1.0.0",
+  "Type": "source",
+  "Website": "https://example.com",
+  "Features": ["check-update"],
+  "UpdateTime": "2024-05-01T12:00:00Z"
 }
-``` 
+```
+
+### 2.2 ConfigSchema()
+- **用途**：获取插件支持的配置项 schema。
+- **输入**：无
+- **输出**：配置项 schema 的 JSON 字符串（List<ConfigSchemaItem>）
+- **输出示例**：
+```json
+[
+  {
+    "Key": "token",
+    "Label": "GitHub Token",
+    "Type": "string",
+    "Description": "用于访问私有仓库的 GitHub Token",
+    "DefaultValue": "",
+    "Required": false
+  }
+]
+```
+
+### 2.3 Config(string json)
+- **用途**：应用插件配置。
+- **输入**：JSON 字符串，内容为 key-value 配置项
+- **输入示例**：
+```json
+{
+  "token": "ghp_xxx"
+}
+```
+- **输出**：无
+
+### 2.4 CheckUpdate()
+- **用途**：检查插件自身是否有新版本。
+- **输入**：无
+- **输出**：{ "hasUpdate": bool } 的 JSON 字符串
+- **输出示例**：
+```json
+{ "hasUpdate": false }
+```
+
+### 2.5 Update()
+- **用途**：升级插件自身。
+- **输入**：无
+- **输出**：{ "success": bool } 的 JSON 字符串
+- **输出示例**：
+```json
+{ "success": false }
+```
+
+### 2.6 Match(string input)
+- **用途**：来源识别与配置生成。主程序遍历所有插件，找到能解析该来源的插件，并自动生成软件配置。
+- **输入**：用户输入的来源URL、repo、ID等（主程序无需加工，直接传递）
+- **输入示例**：
+```json
+"https://github.com/acg-q/HotUpdateX"
+```
+- **输出**：如果匹配本插件，返回标准 SoftwareInfo JSON，否则返回 null/空字符串。
+- **输出示例**：
+```json
+{
+  "Name": "HotUpdateX",
+  "SourceId": "github",
+  "VersionRegex": "v?(\\d+\\.\\d+\\.\\d+)",
+  "IconUrl": "https://github.com/acg-q.png",
+  "LatestVersion": "1.2.0",
+  "Author": "acg-q",
+  "Description": "HotUpdateX 主程序"
+}
+```
+
+### 2.7 Search(string keyword)
+- **用途**：关键字搜索。主程序在“添加软件”或“搜索软件”时聚合所有插件的搜索结果。
+- **输入**：用户输入的部分字符串或关键字
+- **输入示例**：
+```json
+"telegram"
+```
+- **输出**：SoftwareInfo JSON数组，可为空。
+- **输出示例**：
+```json
+[
+  {
+    "Name": "Telegram Desktop",
+    "SourceId": "web",
+    "VersionRegex": "",
+    "IconUrl": "https://desktop.telegram.org/img/telegram-logo.png",
+    "LatestVersion": "5.0.1",
+    "Author": "Telegram",
+    "Description": "Telegram 官方桌面版"
+  }
+]
+```
+
+### 2.8 LatestAssets(SoftwareInfo info)
+- **用途**：根据 SoftwareInfo 获取当前软件的最新版本及所有可用下载连接（如多平台、多格式）。
+- **输入**：SoftwareInfo JSON
+- **输入示例**：
+```json
+{
+  "Name": "Telegram Desktop",
+  "SourceId": "web",
+  "VersionRegex": "",
+  "IconUrl": "https://desktop.telegram.org/img/telegram-logo.png",
+  "LatestVersion": "5.0.1",
+  "Author": "Telegram",
+  "Description": "Telegram 官方桌面版"
+}
+```
+- **输出**：包含版本号和下载项（名称+URL）的 JSON 对象或数组。
+- **输出示例**：
+```json
+{
+  "Version": "5.0.1",
+  "Assets": [
+    { "Name": "Windows x64 安装包", "Url": "https://updates.tdesktop.com/tsetup/tsetup.5.0.1.exe" },
+    { "Name": "macOS DMG", "Url": "https://updates.tdesktop.com/tsetup/tsetup.5.0.1.dmg" },
+    { "Name": "Linux tar.xz", "Url": "https://updates.tdesktop.com/tsetup/tsetup.5.0.1.tar.xz" }
+  ]
+}
+```
+
+--- 
